@@ -1,17 +1,19 @@
 ﻿using FB.Data;
 using FB.Models.Domain;
 using FB.Models.ViewModels;
+using FB.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FB.Controllers
 {
     public class AdminTagsController : Controller
     {
-        private readonly FB_DBContext fB_DBContext;
+        private readonly ITagRepository tagRepository;
 
-        public AdminTagsController(FB_DBContext fB_DBContext)
+        public AdminTagsController(ITagRepository tagRepository)
         {
-            this.fB_DBContext = fB_DBContext;
+            this.tagRepository = tagRepository;
         }
 
         [HttpGet]
@@ -22,33 +24,32 @@ namespace FB.Controllers
 
         [HttpPost]
         [ActionName("Add")]
-        public IActionResult SubmitTag(AddTagRequest addTagRequest) 
+        public async Task<IActionResult> SubmitTag(AddTagRequest addTagRequest) 
         {
             var tag = new Tag
             {
                 Name = addTagRequest.Name,
                 DisplayName = addTagRequest.DisplayName
             };
-            fB_DBContext.Tags.Add(tag);
-            fB_DBContext.SaveChanges();
+
+            await tagRepository.AddAsync(tag);
 
             return RedirectToAction("List");
         }
 
         [HttpGet]
         [ActionName("List")]
-        public IActionResult List() 
+        public async Task<IActionResult> List() 
         {
-            var tags = fB_DBContext.Tags.ToList();
-            
+           var tags = await tagRepository.GetAllAsync(); 
 
             return View(tags);  
         }
 
         [HttpGet] 
-        public IActionResult Edit(Guid id)
+        public async Task<IActionResult> Edit(Guid id)
         {
-            var tag = fB_DBContext.Tags.FirstOrDefault(x => x.Id == id);
+            var tag = await tagRepository.GetAsync(id);
 
             if(tag != null)
             {
@@ -66,7 +67,7 @@ namespace FB.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(EditTagRequest editTagRequest)
+        public async Task<IActionResult> Edit(EditTagRequest editTagRequest)
         {
             var tag = new Tag
             {
@@ -75,30 +76,23 @@ namespace FB.Controllers
                 DisplayName = editTagRequest.DisplayName
             };
 
-            var existingTag = fB_DBContext.Tags.Find(tag.Id);
-
-            if(existingTag != null)
+            var updatedTag = await tagRepository.UpdateAsync(tag);
+             
+            if(updatedTag != null)
             {
-                existingTag.Name = tag.Name;
-                existingTag.DisplayName = tag.DisplayName;
-
-                fB_DBContext.SaveChanges();
-                return RedirectToAction("Edit", new { id = editTagRequest.Id });
+                return RedirectToAction("List");
             }
 
             return RedirectToAction("Edit", new {id = editTagRequest.Id});
         }
 
         [HttpPost]
-        public IActionResult Delete(EditTagRequest editTagRequest) 
+        public async Task<IActionResult> Delete(EditTagRequest editTagRequest) 
         {
-            var tag = fB_DBContext.Tags.Find(editTagRequest.Id);
+           var tag = await tagRepository.DeleteAsync(editTagRequest.Id);
 
-            if(tag != null)
-            {
-                fB_DBContext.Tags.Remove(tag); 
-                fB_DBContext.SaveChanges();
-
+            if (tag != null)
+            { 
                 return RedirectToAction("List");
             }
 
