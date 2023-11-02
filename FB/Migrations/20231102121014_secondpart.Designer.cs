@@ -4,6 +4,7 @@ using FB.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FB.Migrations
 {
     [DbContext(typeof(FB_DBContext))]
-    partial class FB_DBContextModelSnapshot : ModelSnapshot
+    [Migration("20231102121014_secondpart")]
+    partial class secondpart
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,15 +46,11 @@ namespace FB.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FeaturedImageUrl")
+                    b.Property<string>("FeaturedTitle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -63,7 +62,7 @@ namespace FB.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("PublishedDate")
+                    b.Property<DateTime>("PulishDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ShortDescription")
